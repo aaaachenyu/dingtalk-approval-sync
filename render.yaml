@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: dingtalk-approval-sync
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: PORT
+        value: 3000
+      - key: POLL_ENABLED
+        value: true
