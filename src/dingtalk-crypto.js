@@ -26,6 +26,13 @@ export function sign(token, timestamp, nonce, encrypt) {
 }
 
 export function decryptCallback({ token, encodingAesKey, ownerKey, signature, timestamp, nonce, encrypt }) {
+  if (!signature) {
+    throw new Error('Missing DingTalk msg_signature');
+  }
+  if (!timestamp || !nonce || !encrypt) {
+    throw new Error('Missing DingTalk callback timestamp, nonce, or encrypt');
+  }
+
   const expected = sign(token, timestamp, nonce, encrypt);
   if (expected !== signature) {
     throw new Error('Invalid DingTalk callback signature');

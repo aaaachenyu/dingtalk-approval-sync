@@ -19,6 +19,10 @@ function extractProcessInstanceId(event) {
   );
 }
 
+function queryStringValue(value) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
 export function createServer({ syncService }) {
   const app = express();
   app.use(express.json({ limit: '2mb' }));
@@ -28,10 +32,21 @@ export function createServer({ syncService }) {
   });
 
   app.post('/dingtalk/events', (req, res) => {
-    const { msg_signature: signature, timestamp, nonce } = req.query;
+    const msgSignature = queryStringValue(req.query.msg_signature);
+    const legacySignature = queryStringValue(req.query.signature);
+    const timestamp = queryStringValue(req.query.timestamp);
+    const nonce = queryStringValue(req.query.nonce);
     const encrypted = req.body?.encrypt;
     let event;
     let encryptedResponse;
+
+    logger.info('Received DingTalk event callback', {
+      hasMsgSignature: Boolean(msgSignature),
+      hasLegacySignature: Boolean(legacySignature),
+      hasTimestamp: Boolean(timestamp),
+      hasNonce: Boolean(nonce),
+      hasEncrypt: Boolean(encrypted),
+    });
 
     try {
       if (encrypted) {
@@ -39,7 +54,7 @@ export function createServer({ syncService }) {
           token: config.dingtalk.callbackToken,
           encodingAesKey: config.dingtalk.callbackAesKey,
           ownerKey: config.dingtalk.callbackOwnerKey,
-          signature,
+          signature: msgSignature,
           timestamp,
           nonce,
           encrypt: encrypted,
