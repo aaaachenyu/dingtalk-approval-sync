@@ -17,8 +17,8 @@ await stateStore.load();
 const syncService = new SyncService({ dingtalkClient, sheetsClient, stateStore });
 const app = createServer({ syncService });
 
-app.listen(config.port, () => {
-  logger.info(`Server listening on port ${config.port}`);
+app.listen(config.port, config.host, () => {
+  logger.info(`Server listening on ${config.host}:${config.port}`);
 });
 
 if (config.poll.enabled) {
