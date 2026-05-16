@@ -113,4 +113,20 @@ export class GoogleSheetsClient {
 
     this.approvalIdCache = null;
   }
+
+  async updateCells(updates) {
+    if (!updates.length) return;
+
+    const sheets = await this.auth();
+    await sheets.spreadsheets.values.batchUpdate({
+      spreadsheetId: config.google.sheetId,
+      requestBody: {
+        valueInputOption: 'USER_ENTERED',
+        data: updates.map(({ range, value }) => ({
+          range,
+          values: [[value]],
+        })),
+      },
+    });
+  }
 }

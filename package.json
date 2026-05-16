@@ -8,6 +8,7 @@
     "start": "node src/index.js",
     "poll": "node src/poll-once.js",
     "backfill": "node src/backfill-once.js",
+    "backfill:translate-purpose": "node src/backfill-purpose-translation.js",
     "test": "node tests/parse-fields.test.js && node tests/dingtalk-crypto.test.js && node tests/dingtalk-client.test.js",
     "test:parse": "node tests/parse-fields.test.js",
     "test:crypto": "node tests/dingtalk-crypto.test.js"

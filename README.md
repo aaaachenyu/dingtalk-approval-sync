@@ -187,6 +187,18 @@ NOMINA COLABORADORES INTERNOS 01Q05 / 内部员工工资 01Q05
 TRANSLATE_PURPOSE_TO_CHINESE=false
 ```
 
+只回填现有 Sheet 的“付款用途”中文翻译：
+
+```bash
+npm run backfill:translate-purpose
+```
+
+先预览不写入：
+
+```bash
+BACKFILL_DRY_RUN=true npm run backfill:translate-purpose
+```
+
 说明：钉钉新版审批详情通常返回发起人 `userId`。如果接口响应里包含 `originatorUserName`，服务会优先写姓名；否则写入 `userId`。如需强制转换成姓名，需要给应用额外添加成员信息读权限，再接入用户详情接口。
 
 ## 参考文档
