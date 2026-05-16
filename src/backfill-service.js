@@ -44,7 +44,7 @@ function fillMissing(existingRow, parsedRow) {
   }
 
   if (shouldUpdatePurposeTranslation(row[COLS.purpose], parsedRow[COLS.purpose])) {
-    row[COLS.purpose] = parsedRow[COLS.purpose];
+    row[COLS.purpose] = parsedRow[COLS.purpose] || row[COLS.purpose];
     changed = true;
   }
 

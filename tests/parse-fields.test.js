@@ -67,7 +67,7 @@ assert.equal(spanishRow[6], '33685.00');
 assert.equal(spanishRow[7], 'NEXOLU SA DE CV');
 assert.equal(
   spanishRow[8],
-  'NOMINA COLABORADORES INTERNOS 01Q05 / \u5185\u90e8\u5458\u5de5\u5de5\u8d44 01Q05',
+  'NOMINA COLABORADORES INTERNOS 01Q05\n\n\u4e2d\u6587\uff1a\u5185\u90e8\u5458\u5de5\u5de5\u8d44',
 );
 
 console.log('parse-fields.test.js passed');

@@ -178,7 +178,9 @@ FIELD_ATTACHMENTS=附件,付款附件,上传附件
 服务会把常见西语付款用途追加中文翻译，例如：
 
 ```text
-NOMINA COLABORADORES INTERNOS 01Q05 / 内部员工工资 01Q05
+NOMINA COLABORADORES INTERNOS 01Q05
+
+中文：内部员工工资
 ```
 
 如需关闭：
@@ -191,6 +193,12 @@ TRANSLATE_PURPOSE_TO_CHINESE=false
 
 ```bash
 npm run backfill:translate-purpose
+```
+
+如果旧行已经被写成 `原文 / 中文...` 的旧格式，可用同一个命令清理并重写为末尾中文摘要格式：
+
+```bash
+npm run backfill:rewrite-purpose
 ```
 
 先预览不写入：
