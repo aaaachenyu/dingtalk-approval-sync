@@ -14,11 +14,21 @@ const sheetsClient = new GoogleSheetsClient();
 try {
   const rows = await sheetsClient.getRows();
   const updates = [];
+  const samples = [];
 
   rows.slice(1).forEach((row, index) => {
     const rowNumber = index + 2;
     const currentPurpose = row[PURPOSE_INDEX] || '';
     const translatedPurpose = appendPurposeTranslation(currentPurpose);
+
+    if (samples.length < 5) {
+      samples.push({
+        rowNumber,
+        currentPurpose,
+        translatedPurpose,
+        changed: translatedPurpose !== currentPurpose,
+      });
+    }
 
     if (translatedPurpose && translatedPurpose !== currentPurpose) {
       updates.push({
@@ -31,6 +41,7 @@ try {
   logger.info('Prepared purpose translation backfill updates', {
     updateCells: updates.length,
     dryRun,
+    samples,
   });
 
   if (!dryRun && updates.length) {
