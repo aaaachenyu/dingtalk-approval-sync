@@ -4,6 +4,22 @@ import { logger } from './logger.js';
 
 const API_BASE = 'https://api.dingtalk.com';
 
+export function buildInstanceIdQueryPayload({ startTime, endTime, nextToken = '' }) {
+  const data = {
+    processCode: config.dingtalk.processCode,
+    startTime: startTime.getTime(),
+    endTime: endTime.getTime(),
+    maxResults: 20,
+    nextToken,
+  };
+
+  if (config.dingtalk.pollStatuses.length) {
+    data.status = config.dingtalk.pollStatuses[0];
+  }
+
+  return data;
+}
+
 export class DingTalkClient {
   constructor() {
     this.accessToken = null;
@@ -27,32 +43,30 @@ export class DingTalkClient {
 
   async request(method, path, { params, data } = {}) {
     const token = await this.getAccessToken();
-    const response = await axios.request({
-      method,
-      url: `${API_BASE}${path}`,
-      params,
-      data,
-      headers: {
-        'x-acs-dingtalk-access-token': token,
-      },
-      timeout: 15_000,
-    });
-    return response.data;
+    try {
+      const response = await axios.request({
+        method,
+        url: `${API_BASE}${path}`,
+        params,
+        data,
+        headers: {
+          'x-acs-dingtalk-access-token': token,
+        },
+        timeout: 15_000,
+      });
+      return response.data;
+    } catch (error) {
+      const responseData = error.response?.data;
+      const safeError = new Error(responseData?.message || error.message);
+      safeError.code = responseData?.code;
+      safeError.status = error.response?.status;
+      safeError.response = { data: responseData };
+      throw safeError;
+    }
   }
 
   async queryCompletedInstanceIds({ startTime, endTime, nextToken } = {}) {
-    const data = {
-      processCode: config.dingtalk.processCode,
-      startTime: startTime.getTime(),
-      endTime: endTime.getTime(),
-      maxResults: 20,
-    };
-
-    if (nextToken) data.nextToken = nextToken;
-    if (config.dingtalk.pollStatuses.length) {
-      data.status = config.dingtalk.pollStatuses[0];
-    }
-
+    const data = buildInstanceIdQueryPayload({ startTime, endTime, nextToken: nextToken || '' });
     return this.request('POST', '/v1.0/workflow/processes/instanceIds/query', { data });
   }
 

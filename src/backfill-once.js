@@ -14,5 +14,14 @@ const backfillService = new BackfillService({
   sheetsClient: new GoogleSheetsClient(),
 });
 
-const result = await backfillService.backfill({ lookbackMinutes, dryRun });
-logger.info('Backfill completed', result);
+try {
+  const result = await backfillService.backfill({ lookbackMinutes, dryRun });
+  logger.info('Backfill completed', result);
+} catch (error) {
+  logger.error('Backfill failed', {
+    code: error.code || error.response?.data?.code,
+    status: error.status || error.response?.status,
+    message: error.response?.data?.message || error.message,
+  });
+  process.exitCode = 1;
+}
