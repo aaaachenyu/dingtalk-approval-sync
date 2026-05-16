@@ -5,7 +5,8 @@ const startTime = new Date('2026-05-01T00:00:00.000Z');
 const endTime = new Date('2026-05-16T00:00:00.000Z');
 
 const firstPage = buildInstanceIdQueryPayload({ startTime, endTime });
-assert.equal(firstPage.nextToken, '');
+assert.equal(firstPage.nextToken, 0);
+assert.deepEqual(firstPage.statuses, ['COMPLETED']);
 
 const nextPage = buildInstanceIdQueryPayload({ startTime, endTime, nextToken: 'abc' });
 assert.equal(nextPage.nextToken, 'abc');

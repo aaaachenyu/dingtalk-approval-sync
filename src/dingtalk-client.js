@@ -4,7 +4,7 @@ import { logger } from './logger.js';
 
 const API_BASE = 'https://api.dingtalk.com';
 
-export function buildInstanceIdQueryPayload({ startTime, endTime, nextToken = '' }) {
+export function buildInstanceIdQueryPayload({ startTime, endTime, nextToken = 0 }) {
   const data = {
     processCode: config.dingtalk.processCode,
     startTime: startTime.getTime(),
@@ -14,7 +14,7 @@ export function buildInstanceIdQueryPayload({ startTime, endTime, nextToken = ''
   };
 
   if (config.dingtalk.pollStatuses.length) {
-    data.status = config.dingtalk.pollStatuses[0];
+    data.statuses = config.dingtalk.pollStatuses;
   }
 
   return data;
@@ -66,7 +66,7 @@ export class DingTalkClient {
   }
 
   async queryCompletedInstanceIds({ startTime, endTime, nextToken } = {}) {
-    const data = buildInstanceIdQueryPayload({ startTime, endTime, nextToken: nextToken || '' });
+    const data = buildInstanceIdQueryPayload({ startTime, endTime, nextToken: nextToken ?? 0 });
     return this.request('POST', '/v1.0/workflow/processes/instanceIds/query', { data });
   }
 
