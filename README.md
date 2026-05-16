@@ -80,6 +80,33 @@ npm run poll
 
 这会按 `.env` 的 `POLL_LOOKBACK_MINUTES` 查询最近审批实例，获取详情后写入 Google Sheet。
 
+## 回填已有行
+
+如果旧数据已经写入 Google Sheet，但金额、付款对象、用途等字段为空，可以运行回填：
+
+```bash
+npm run backfill
+```
+
+回填会读取当前 Sheet，按 `approval_instance_id` 或“审批编号”匹配钉钉审批实例，只补空字段，不覆盖已有值。默认查询最近 `POLL_LOOKBACK_MINUTES` 分钟的审批，也可以临时指定更长范围：
+
+```bash
+BACKFILL_LOOKBACK_MINUTES=43200 npm run backfill
+```
+
+先预览不写入：
+
+```bash
+BACKFILL_DRY_RUN=true npm run backfill
+```
+
+Windows CMD 可这样写：
+
+```bat
+set BACKFILL_LOOKBACK_MINUTES=43200
+npm run backfill
+```
+
 ## 本地明文回调测试
 
 仅本地测试时设置：

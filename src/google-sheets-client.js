@@ -67,6 +67,16 @@ export class GoogleSheetsClient {
     return this.approvalIdCache;
   }
 
+  async getRows() {
+    const sheets = await this.auth();
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: config.google.sheetId,
+      range: config.google.range,
+    });
+
+    return response.data.values || [];
+  }
+
   async hasApprovalId(approvalInstanceId) {
     const ids = await this.loadApprovalIds();
     return ids.has(approvalInstanceId);
@@ -84,5 +94,23 @@ export class GoogleSheetsClient {
     });
 
     if (this.approvalIdCache) this.approvalIdCache.add(row[0]);
+  }
+
+  async updateRows(updates) {
+    if (!updates.length) return;
+
+    const sheets = await this.auth();
+    await sheets.spreadsheets.values.batchUpdate({
+      spreadsheetId: config.google.sheetId,
+      requestBody: {
+        valueInputOption: 'USER_ENTERED',
+        data: updates.map(({ rowNumber, row }) => ({
+          range: `${this.sheetName()}!A${rowNumber}:K${rowNumber}`,
+          values: [row],
+        })),
+      },
+    });
+
+    this.approvalIdCache = null;
   }
 }

@@ -26,7 +26,10 @@ export class SyncService {
     }
 
     const detail = await this.dingtalkClient.getInstanceDetail(processInstanceId);
-    const approval = await parseApprovalInstance(detail, { dingtalkClient: this.dingtalkClient });
+    const approval = await parseApprovalInstance(detail, {
+      dingtalkClient: this.dingtalkClient,
+      processInstanceId,
+    });
 
     if (!approval.completed) {
       logger.info('Skipped non-completed approval instance', {

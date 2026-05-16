@@ -31,6 +31,8 @@ const parseList = (value, fallback = []) => {
     .filter(Boolean);
 };
 
+const mergeList = (value, fallback = []) => [...new Set([...parseList(value, []), ...fallback])];
+
 const bool = (value, fallback = false) => {
   if (value == null || value === '') return fallback;
   return ['1', 'true', 'yes', 'on'].includes(String(value).toLowerCase());
@@ -69,24 +71,38 @@ export const config = {
   },
 
   fields: {
-    paymentAmount: parseList(process.env.FIELD_PAYMENT_AMOUNT, [
+    paymentAmount: mergeList(process.env.FIELD_PAYMENT_AMOUNT, [
       '\u4ed8\u6b3e\u91d1\u989d',
       '\u91d1\u989d',
       '\u652f\u4ed8\u91d1\u989d',
+      '\u5de5\u8d44\u91d1\u989d',
+      '\u5b9e\u4ed8\u91d1\u989d',
+      'amount',
+      'total',
+      'payment amount',
+      'importe',
+      'monto',
+      'monto total',
     ]),
-    payee: parseList(process.env.FIELD_PAYEE, [
+    payee: mergeList(process.env.FIELD_PAYEE, [
       '\u4ed8\u6b3e\u5bf9\u8c61',
       '\u6536\u6b3e\u65b9',
       '\u4f9b\u5e94\u5546',
       '\u5ba2\u6237',
+      'proveedor',
+      'supplier',
+      'vendor',
     ]),
-    purpose: parseList(process.env.FIELD_PURPOSE, [
+    purpose: mergeList(process.env.FIELD_PURPOSE, [
       '\u4ed8\u6b3e\u7528\u9014',
       '\u7528\u9014',
       '\u4ed8\u6b3e\u4e8b\u7531',
+      'motivo de pago',
+      'payment purpose',
+      'purpose',
     ]),
-    remark: parseList(process.env.FIELD_REMARK, ['\u5907\u6ce8', '\u8bf4\u660e']),
-    attachments: parseList(process.env.FIELD_ATTACHMENTS, [
+    remark: mergeList(process.env.FIELD_REMARK, ['\u5907\u6ce8', '\u8bf4\u660e']),
+    attachments: mergeList(process.env.FIELD_ATTACHMENTS, [
       '\u9644\u4ef6',
       '\u4ed8\u6b3e\u9644\u4ef6',
       '\u4e0a\u4f20\u9644\u4ef6',

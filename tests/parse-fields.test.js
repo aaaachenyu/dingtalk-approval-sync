@@ -35,4 +35,36 @@ assert.equal(row[8], '\u5408\u540c\u5c3e\u6b3e');
 assert.equal(row[9], '\u5df2\u6838\u5bf9\u53d1\u7968');
 assert.equal(row[10], 'https://example.com/invoice.pdf');
 
+const spacedDetail = {
+  result: {
+    processInstanceId: 'pi-002',
+    status: 'COMPLETED',
+    result: 'agree',
+    formComponentValues: [
+      { name: '\u4ed8\u6b3e\u91d1\u989d\uff08MXN\uff09', value: '888.00' },
+    ],
+  },
+};
+
+const spacedApproval = await parseApprovalInstance(spacedDetail);
+assert.equal(approvalToRow(spacedApproval)[6], '888.00');
+
+const spanishDetail = {
+  result: {
+    processInstanceId: 'pi-003',
+    status: 'COMPLETED',
+    result: 'agree',
+    formComponentValues: [
+      { name: 'Motivo de pago', value: 'NOMINA COLABORADORES INTERNOS 01Q05' },
+      { name: 'Monto Total', value: '33685.00' },
+      { name: 'Proveedor', value: 'NEXOLU SA DE CV' },
+    ],
+  },
+};
+
+const spanishRow = approvalToRow(await parseApprovalInstance(spanishDetail));
+assert.equal(spanishRow[6], '33685.00');
+assert.equal(spanishRow[7], 'NEXOLU SA DE CV');
+assert.equal(spanishRow[8], 'NOMINA COLABORADORES INTERNOS 01Q05');
+
 console.log('parse-fields.test.js passed');

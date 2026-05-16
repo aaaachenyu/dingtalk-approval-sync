@@ -1,4 +1,5 @@
 import { config } from './config.js';
+import { logger } from './logger.js';
 
 const headers = [
   'approval_instance_id',
@@ -20,6 +21,10 @@ function normalize(value) {
   return String(value || '')
     .trim()
     .toLowerCase();
+}
+
+function compact(value) {
+  return normalize(value).replace(/[\s_\-:：()[\]（）]/g, '');
 }
 
 function maybeParseJson(value) {
@@ -59,16 +64,28 @@ function componentName(component) {
   return component.name || component.label || component.title || component.componentName || component.bizAlias || '';
 }
 
+function componentNames(component) {
+  return [
+    componentName(component),
+    component.bizAlias,
+    component.id,
+    component.componentId,
+    component.label,
+    component.title,
+  ].filter(Boolean);
+}
+
 function matchComponent(components, names) {
   const wanted = new Set(names.map(normalize));
+  const compactWanted = new Set(names.map(compact));
   return components.find((component) => {
-    const candidates = [
-      componentName(component),
-      component.bizAlias,
-      component.id,
-      component.componentId,
-    ].map(normalize);
-    return candidates.some((candidate) => wanted.has(candidate));
+    const candidates = componentNames(component).map(normalize);
+    const compactCandidates = componentNames(component).map(compact);
+    return (
+      candidates.some((candidate) => wanted.has(candidate)) ||
+      compactCandidates.some((candidate) => compactWanted.has(candidate)) ||
+      compactCandidates.some((candidate) => [...compactWanted].some((name) => name && candidate.includes(name)))
+    );
   });
 }
 
@@ -155,9 +172,21 @@ function isCompleted(detail) {
   return ['completed', 'finish', 'finished', 'agree', 'agreed'].includes(status) || ['agree', 'agreed'].includes(result);
 }
 
-export async function parseApprovalInstance(rawDetail, { dingtalkClient } = {}) {
+function logMissingAmount({ approvalInstanceId, components }) {
+  logger.warn('Payment amount field was not matched in DingTalk approval form', {
+    approvalInstanceId,
+    configuredNames: config.fields.paymentAmount,
+    receivedFields: components.map((component) => ({
+      name: componentName(component),
+      bizAlias: component.bizAlias,
+      id: component.id || component.componentId,
+    })),
+  });
+}
+
+export async function parseApprovalInstance(rawDetail, { dingtalkClient, processInstanceId } = {}) {
   const detail = rawDetail.result || rawDetail;
-  const approvalInstanceId = detail.processInstanceId || detail.instanceId || detail.id;
+  const approvalInstanceId = detail.processInstanceId || detail.instanceId || detail.id || processInstanceId;
   const components = flattenComponentValues(detail.formComponentValues || detail.formComponentValueVOS || []);
 
   const amountComponent = matchComponent(components, config.fields.paymentAmount);
@@ -188,6 +217,10 @@ export async function parseApprovalInstance(rawDetail, { dingtalkClient } = {}) 
     detail.endTime ||
     detail.gmtModified ||
     detail.createTime;
+
+  if (!amountComponent) {
+    logMissingAmount({ approvalInstanceId, components });
+  }
 
   return {
     approvalInstanceId,
