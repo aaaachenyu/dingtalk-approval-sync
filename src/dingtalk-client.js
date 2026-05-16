@@ -4,9 +4,9 @@ import { logger } from './logger.js';
 
 const API_BASE = 'https://api.dingtalk.com';
 
-export function buildInstanceIdQueryPayload({ startTime, endTime, nextToken = 0 }) {
+export function buildInstanceIdQueryPayload({ processCode, startTime, endTime, nextToken = 0 }) {
   const data = {
-    processCode: config.dingtalk.processCode,
+    processCode,
     startTime: startTime.getTime(),
     endTime: endTime.getTime(),
     maxResults: 20,
@@ -65,25 +65,53 @@ export class DingTalkClient {
     }
   }
 
-  async queryCompletedInstanceIds({ startTime, endTime, nextToken } = {}) {
-    const data = buildInstanceIdQueryPayload({ startTime, endTime, nextToken: nextToken ?? 0 });
+  async queryCompletedInstanceIds({ processCode, startTime, endTime, nextToken } = {}) {
+    const data = buildInstanceIdQueryPayload({
+      processCode,
+      startTime,
+      endTime,
+      nextToken: nextToken ?? 0,
+    });
     return this.request('POST', '/v1.0/workflow/processes/instanceIds/query', { data });
+  }
+
+  async listCompletedInstanceIdsForProcess({ processCode, startTime, endTime }) {
+    const ids = [];
+    let nextToken;
+
+    do {
+      const page = await this.queryCompletedInstanceIds({ processCode, startTime, endTime, nextToken });
+      const pageIds = page.result?.list || page.result?.processInstanceIds || page.list || [];
+      ids.push(...pageIds);
+      nextToken = page.result?.nextToken || page.nextToken;
+    } while (nextToken);
+
+    logger.info('DingTalk poll found instance ids for process', { processCode, count: ids.length });
+    return ids;
   }
 
   async listCompletedInstanceIds({ lookbackMinutes }) {
     const endTime = new Date();
     const startTime = new Date(endTime.getTime() - lookbackMinutes * 60_000);
     const ids = [];
-    let nextToken;
 
-    do {
-      const page = await this.queryCompletedInstanceIds({ startTime, endTime, nextToken });
-      const pageIds = page.result?.list || page.result?.processInstanceIds || page.list || [];
-      ids.push(...pageIds);
-      nextToken = page.result?.nextToken || page.nextToken;
-    } while (nextToken);
+    for (const processCode of config.dingtalk.processCodes) {
+      try {
+        ids.push(...await this.listCompletedInstanceIdsForProcess({ processCode, startTime, endTime }));
+      } catch (error) {
+        logger.error('DingTalk poll failed for process', {
+          processCode,
+          code: error.code || error.response?.data?.code,
+          status: error.status || error.response?.status,
+          message: error.response?.data?.message || error.message,
+        });
+      }
+    }
 
-    logger.info('DingTalk poll found instance ids', { count: ids.length });
+    logger.info('DingTalk poll found instance ids', {
+      processCodes: config.dingtalk.processCodes.length,
+      count: ids.length,
+    });
     return [...new Set(ids)];
   }
 

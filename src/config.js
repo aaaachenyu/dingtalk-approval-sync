@@ -47,6 +47,10 @@ export const config = {
     appKey: process.env.DINGTALK_APP_KEY,
     appSecret: process.env.DINGTALK_APP_SECRET,
     processCode: process.env.DINGTALK_PROCESS_CODE,
+    processCodes: parseList(
+      process.env.DINGTALK_PROCESS_CODES,
+      parseList(process.env.DINGTALK_PROCESS_CODE, []),
+    ),
     callbackToken: process.env.DINGTALK_CALLBACK_TOKEN,
     callbackAesKey: process.env.DINGTALK_CALLBACK_AES_KEY,
     callbackOwnerKey:
@@ -122,7 +126,9 @@ export function validateConfig({ forServer = true } = {}) {
 
   requireValue(config.dingtalk.appKey, 'DINGTALK_APP_KEY');
   requireValue(config.dingtalk.appSecret, 'DINGTALK_APP_SECRET');
-  requireValue(config.dingtalk.processCode, 'DINGTALK_PROCESS_CODE');
+  if (!config.dingtalk.processCodes.length) {
+    missing.push('DINGTALK_PROCESS_CODE or DINGTALK_PROCESS_CODES');
+  }
   requireValue(config.google.sheetId, 'GOOGLE_SHEET_ID');
 
   if (!config.google.serviceAccountJson && !config.google.credentialsPath) {

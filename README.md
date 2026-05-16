@@ -216,3 +216,18 @@ BACKFILL_DRY_RUN=true npm run backfill:translate-purpose
 - [钉钉获取审批实例 ID 列表](https://dingtalk.apifox.cn/api-141006691)：`POST https://api.dingtalk.com/v1.0/workflow/processes/instanceIds/query`
 - [钉钉获取单个审批实例详情](https://dingtalk.apifox.cn/api-141004134)：`GET https://api.dingtalk.com/v1.0/workflow/processInstances`
 - [Google Sheets 追加写入](https://developers.google.com/workspace/sheets/api/reference/rest/v4/spreadsheets.values/append)：`spreadsheets.values.append`
+## Multiple DingTalk Approval Processes
+
+Use `DINGTALK_PROCESS_CODES` when more than one approval process should sync into the same Google Sheet:
+
+```bash
+DINGTALK_PROCESS_CODES=PROC-aaa,PROC-bbb,PROC-ccc
+```
+
+`DINGTALK_PROCESS_CODE` still works for a single process. If `DINGTALK_PROCESS_CODES` is set, polling and backfill use that list.
+
+For DingTalk HTTP event push, subscribe each process code to the same callback URL:
+
+```text
+https://your-render-domain.onrender.com/dingtalk/events
+```
