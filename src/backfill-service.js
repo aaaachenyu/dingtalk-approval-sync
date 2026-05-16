@@ -1,5 +1,6 @@
 import { approvalToRow, parseApprovalInstance } from './approval-parser.js';
 import { logger } from './logger.js';
+import { needsPurposeTranslation, shouldUpdatePurposeTranslation } from './purpose-translator.js';
 
 const COLS = {
   approvalInstanceId: 0,
@@ -25,6 +26,7 @@ function rowNeedsBackfill(row) {
     !normalize(row[COLS.paymentAmount]) ||
     !normalize(row[COLS.payee]) ||
     !normalize(row[COLS.purpose]) ||
+    needsPurposeTranslation(row[COLS.purpose]) ||
     !normalize(row[COLS.remark]) ||
     !normalize(row[COLS.attachments])
   );
@@ -39,6 +41,11 @@ function fillMissing(existingRow, parsedRow) {
       row[index] = parsedRow[index];
       changed = true;
     }
+  }
+
+  if (shouldUpdatePurposeTranslation(row[COLS.purpose], parsedRow[COLS.purpose])) {
+    row[COLS.purpose] = parsedRow[COLS.purpose];
+    changed = true;
   }
 
   return { row, changed };

@@ -1,5 +1,6 @@
 import { config } from './config.js';
 import { logger } from './logger.js';
+import { appendPurposeTranslation } from './purpose-translator.js';
 
 const headers = [
   'approval_instance_id',
@@ -24,7 +25,7 @@ function normalize(value) {
 }
 
 function compact(value) {
-  return normalize(value).replace(/[\s_\-:：()[\]（）]/g, '');
+  return normalize(value).replace(/[\s_\-:\uFF1A()[\]\uFF08\uFF09]/g, '');
 }
 
 function maybeParseJson(value) {
@@ -231,7 +232,7 @@ export async function parseApprovalInstance(rawDetail, { dingtalkClient, process
     finishedTime: formatTime(finishedTime),
     paymentAmount: extractValue(amountComponent),
     payee: extractValue(payeeComponent),
-    purpose: extractValue(purposeComponent),
+    purpose: appendPurposeTranslation(extractValue(purposeComponent)),
     remark: extractValue(remarkComponent),
     attachmentLinks: attachmentLinks.join('\n'),
     status: detail.status || detail.processInstanceStatus || '',

@@ -65,6 +65,9 @@ const spanishDetail = {
 const spanishRow = approvalToRow(await parseApprovalInstance(spanishDetail));
 assert.equal(spanishRow[6], '33685.00');
 assert.equal(spanishRow[7], 'NEXOLU SA DE CV');
-assert.equal(spanishRow[8], 'NOMINA COLABORADORES INTERNOS 01Q05');
+assert.equal(
+  spanishRow[8],
+  'NOMINA COLABORADORES INTERNOS 01Q05 / \u5185\u90e8\u5458\u5de5\u5de5\u8d44 01Q05',
+);
 
 console.log('parse-fields.test.js passed');

@@ -173,6 +173,20 @@ FIELD_ATTACHMENTS=附件,付款附件,上传附件
 
 服务会按字段名、字段别名 `bizAlias` 做匹配。
 
+## 付款用途中文翻译
+
+服务会把常见西语付款用途追加中文翻译，例如：
+
+```text
+NOMINA COLABORADORES INTERNOS 01Q05 / 内部员工工资 01Q05
+```
+
+如需关闭：
+
+```bash
+TRANSLATE_PURPOSE_TO_CHINESE=false
+```
+
 说明：钉钉新版审批详情通常返回发起人 `userId`。如果接口响应里包含 `originatorUserName`，服务会优先写姓名；否则写入 `userId`。如需强制转换成姓名，需要给应用额外添加成员信息读权限，再接入用户详情接口。
 
 ## 参考文档

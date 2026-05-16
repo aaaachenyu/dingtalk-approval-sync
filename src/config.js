@@ -63,6 +63,10 @@ export const config = {
     lookbackMinutes: Number(process.env.POLL_LOOKBACK_MINUTES || 1440),
   },
 
+  translation: {
+    purposeToChinese: bool(process.env.TRANSLATE_PURPOSE_TO_CHINESE, true),
+  },
+
   google: {
     sheetId: process.env.GOOGLE_SHEET_ID,
     range: process.env.GOOGLE_SHEET_RANGE || 'Approvals!A:K',
